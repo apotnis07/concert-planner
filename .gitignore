@@ -1,0 +1,20 @@
+# Python
+backend/.venv/
+backend/__pycache__/
+**/__pycache__/
+**/*.pyc
+backend/.uv/
+
+# Secrets — most important
+backend/.env
+frontend/.env
+.env
+
+# Frontend (for later)
+frontend/node_modules/
+frontend/dist/
+
+.DS_Store
+.vscode/
+
+.cache
