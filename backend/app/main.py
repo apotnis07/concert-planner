@@ -1,6 +1,7 @@
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from app.agents.spotify_agent import get_followed_artists, get_auth_manager
+from app.graph.graph import graph
 
 app = FastAPI(title="Night Out Planner API")
 
@@ -39,5 +40,26 @@ def top_artists(access_token: str = Query(...)):
     try:
         artists = get_followed_artists(access_token)
         return {"artists": artists}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    
+@app.get("/api/plan")
+def plan(access_token: str = Query(...)):
+    """Run the full multi-agent graph and return the night out plan."""
+    initial_state: dict = {
+        "access_token": access_token,
+        "city": "Chicago",
+        "followed_artists": [],
+        "concerts": [],
+        "directions": [],
+        "restaurants": [],
+        "cost_estimate": {},
+        "summary": "",
+        "errors": [],
+    }
+    
+    try: 
+        result = graph.invoke(initial_state)
+        return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

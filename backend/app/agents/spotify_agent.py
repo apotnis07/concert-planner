@@ -1,6 +1,7 @@
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 from app.config import settings
+from app.graph.state import State
 
 SCOPES = "user-follow-read"
 
@@ -28,3 +29,16 @@ def get_auth_manager() -> SpotifyOAuth:
         redirect_uri=settings.spotify_redirect_uri,
         scope=SCOPES,
     )    
+    
+def spotify_node(state: State) -> State:
+    """LangGraph node — reads access_token from state, writes followed_artists."""
+    try:
+        artists = get_followed_artists(state["access_token"])
+        return {**state, "followed_artists": artists}
+    
+    except Exception as e:
+        return {
+            **state,
+            "followed_artists": [],
+            "errors": state.get("errors", []) + [f"Spotify error: {str(e)}"]
+        }
