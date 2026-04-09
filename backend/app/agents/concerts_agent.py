@@ -56,6 +56,9 @@ def get_concerts_for_artists(artist_names: list[str], city: str) -> list[dict]:
                     venue = event.get("_embedded", {}).get("venues", [{}])[0]
                     price_ranges = event.get("priceRanges", [{}])[0]
 
+                    venue_lat = venue.get("location", {}).get("latitude")
+                    venue_lng = venue.get("location", {}).get("longitude")
+
                      # Try search result prices first
                     if price_ranges:
                         min_price = price_ranges[0].get("min")
@@ -72,6 +75,8 @@ def get_concerts_for_artists(artist_names: list[str], city: str) -> list[dict]:
                         "time": event.get("dates", {}).get("start", {}).get("localTime"),
                         "venue_name": venue.get("name"),
                         "venue_address": venue.get("address", {}).get("line1"),
+                        "venue_lat": float(venue_lat) if venue_lat else None,
+                        "venue_lng": float(venue_lng) if venue_lng else None,
                         "min_price": min_price,
                         "max_price": max_price,
                         "price_available": min_price is not None,  

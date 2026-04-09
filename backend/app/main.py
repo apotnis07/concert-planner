@@ -43,15 +43,31 @@ def top_artists(access_token: str = Query(...)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
     
-@app.get("/api/plan")
+# @app.get("/api/plan")
+# def plan(access_token: str = Query(...)):
+#     """Run the full multi-agent graph and return the night out plan."""
+#     initial_state: dict = {
+#         "access_token": access_token,
+#         "city": "Chicago",
+#         "followed_artists": [],
+#         "concerts": [],
+#         "directions": [],
+#         "restaurants": [],
+#         "cost_estimate": {},
+#         "summary": "",
+#         "errors": [],
+#     }
+    
+@app.post("/api/plan")
 def plan(access_token: str = Query(...)):
-    """Run the full multi-agent graph and return the night out plan."""
     initial_state: dict = {
         "access_token": access_token,
         "city": "Chicago",
+        "origin": "Chicago Union Station, 225 S Canal St, Chicago, IL 60606",
         "followed_artists": [],
         "concerts": [],
         "directions": [],
+        "directions_for": {},
         "restaurants": [],
         "cost_estimate": {},
         "summary": "",
