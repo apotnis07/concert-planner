@@ -108,25 +108,29 @@ def _build_summary_prompt(state: State) -> str:
 
 
 def get_summary(state: State) -> str:
-    """
-    Call Claude to write the full night out summary.
-    Falls back to a plain text summary if Claude is unavailable.
-    """
-    prompt = _build_summary_prompt(state)
+    # Bypassing Claude for now — using plain text fallback
+    return _fallback_summary(state)
 
-    try:
-        message = client.messages.create(
-            model="claude-sonnet-4-20250514",
-            max_tokens=1024,
-            messages=[
-                {"role": "user", "content": prompt}
-            ]
-        )
-        return message.content[0].text.strip()
+# def get_summary(state: State) -> str:
+#     """
+#     Call Claude to write the full night out summary.
+#     Falls back to a plain text summary if Claude is unavailable.
+#     """
+#     prompt = _build_summary_prompt(state)
 
-    except Exception as e:
-        print(f"Summary agent Claude error: {e}")
-        return _fallback_summary(state)
+#     try:
+#         message = client.messages.create(
+#             model="claude-sonnet-4-20250514",
+#             max_tokens=1024,
+#             messages=[
+#                 {"role": "user", "content": prompt}
+#             ]
+#         )
+#         return message.content[0].text.strip()
+
+#     except Exception as e:
+#         print(f"Summary agent Claude error: {e}")
+#         return _fallback_summary(state)
 
 
 def _fallback_summary(state: State) -> str:

@@ -105,34 +105,76 @@ def get_directions(origin: str, destination: str) -> list[dict]:
 def _parse_steps(steps: list, mode: str) -> list[dict]:
     parsed = []
     for step in steps:
-        nav = step.get("navigationInstruction", {})
-        entry = {
-            "instruction": strip_html(nav.get("instructions", "")),
-            "duration": _seconds_to_text(
-                int(step.get("staticDuration", "0s").replace("s", ""))
-            ),
-            "distance": f"{round(step.get('distanceMeters', 0) / 1609.34, 2)} mi",
-        }           
-        
-        if mode == "transit":
-            transit = step.get("transitDetails", {})
+        if mode == 'transit':
+            transit = step.get('transitDetails', {})
             if transit:
-                stop_details = transit.get("stopDetails", {})
-                line = transit.get("transitLine", {})
-                entry["line"] = line.get("nameShort")
-                entry["vehicle"] = (
-                    line.get("vehicle", {}).get("type")
-                )
-                entry["departure_stop"] = (
-                    stop_details.get("departureStop", {}).get("name")
-                )
-                entry["arrival_stop"] = (
-                    stop_details.get("arrivalStop", {}).get("name")
-                )
-                entry["num_stops"] = transit.get("stopCount")
+                stop_details = transit.get('stopDetails', {})
+                line = transit.get('transitLine', {})
+                vehicle = line.get('vehicle', {}).get('type', '')  # SUBWAY, BUS, RAIL
+                line_name = line.get('nameShort') or line.get('name', '')
+                departure = stop_details.get('departureStop', {}).get('name', '')
+                arrival = stop_details.get('arrivalStop', {}).get('name', '')
+                num_stops = transit.get('stopCount')
 
-        parsed.append(entry)
-        
+                # Build a human readable instruction
+                vehicle_label = {
+                    'SUBWAY': 'Take the',
+                    'BUS': 'Take the',
+                    'RAIL': 'Take the',
+                    'TRAM': 'Take the',
+                }.get(vehicle, 'Take the')
+
+                instruction = f"{vehicle_label} {line_name} from {departure} → {arrival}"
+                if num_stops:
+                    instruction += f" ({num_stops} stop{'s' if num_stops > 1 else ''})"
+
+                parsed.append({
+                    'instruction': instruction,
+                    'line': line_name,
+                    'vehicle': vehicle,
+                    'departure_stop': departure,
+                    'arrival_stop': arrival,
+                    'num_stops': num_stops,
+                    'duration': _seconds_to_text(
+                        int(step.get('staticDuration', '0s').replace('s', ''))
+                    ),
+                    'distance': None,  # not meaningful for transit
+                })
+            else:
+                # Walking segment between transit legs
+                nav = step.get('navigationInstruction', {})
+                import re
+                instruction = re.sub(r'<[^>]+>', '', nav.get('instructions', ''))
+                parsed.append({
+                    'instruction': f"🚶 {instruction}",
+                    'line': None,
+                    'vehicle': 'WALK',
+                    'departure_stop': None,
+                    'arrival_stop': None,
+                    'num_stops': None,
+                    'duration': _seconds_to_text(
+                        int(step.get('staticDuration', '0s').replace('s', ''))
+                    ),
+                    'distance': f"{round(step.get('distanceMeters', 0) / 1609.34, 2)} mi",
+                })
+        else:
+            # Driving — keep turn-by-turn as before
+            nav = step.get('navigationInstruction', {})
+            import re
+            instruction = re.sub(r'<[^>]+>', '', nav.get('instructions', ''))
+            parsed.append({
+                'instruction': instruction,
+                'line': None,
+                'vehicle': None,
+                'departure_stop': None,
+                'arrival_stop': None,
+                'num_stops': None,
+                'duration': _seconds_to_text(
+                    int(step.get('staticDuration', '0s').replace('s', ''))
+                ),
+                'distance': f"{round(step.get('distanceMeters', 0) / 1609.34, 2)} mi",
+            })
+
     return parsed
 
 def _seconds_to_text(seconds: int) -> str:
@@ -156,7 +198,23 @@ def directions_node(state: State) -> State:
             "errors": state.get("errors", []) + ["No concerts found, skipping directions."]
         }
     
-    top_concert = concerts[0]
+    # Use selected venue from picker if available, else fall back to first concert
+    selected_lat = state.get("selected_venue_lat")
+    selected_lng = state.get("selected_venue_lng")
+    selected_name = state.get("selected_venue_name")
+    selected_address = state.get("selected_venue_address")
+
+    if selected_lat and selected_lng:
+        top_concert = {
+            "venue_name": selected_name,
+            "venue_address": selected_address,
+            "venue_lat": selected_lat,
+            "venue_lng": selected_lng,
+            "event_name": selected_name,
+        }
+    else:
+        top_concert = concerts[0] if concerts else None
+
     venue_name = top_concert.get("venue_name", "")
     venue_address = top_concert.get("venue_address", "")
     destination = f"{venue_name}, {venue_address}, Chicago, IL"
