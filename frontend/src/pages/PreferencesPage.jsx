@@ -183,7 +183,7 @@ export default function PreferencesPage() {
 
             {/* City */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-              <label style={labelStyle}>Your city</label>
+              <label style={labelStyle}>Destination City</label>
               <input
                 type="text"
                 value={city}

@@ -667,7 +667,7 @@ export default function ResultsPage() {
 
   useEffect(() => {
     const token = sessionStorage.getItem('nop_access_token')
-    
+
 
     if (!token) {
       navigate('/')
@@ -703,6 +703,7 @@ export default function ResultsPage() {
             selected_venue_lat: selectedConcert?.venue_lat || '',
             selected_venue_lng: selectedConcert?.venue_lng || '',
             selected_artist: selectedConcert?.artist || '',
+            selected_date: selectedConcert?.date || '',
 
           },
         })
@@ -757,8 +758,12 @@ export default function ResultsPage() {
 
   const selectedArtist = selectedConcertData.artist;
 
-  // 2. Update the search logic to prioritize the artist name over the venue
+  const selectedDate = selectedConcertData.date; // Extract the date
+
+  // Updated search logic: Artist + Date > Artist > Venue > Fallback
   const topConcert = plan?.concerts?.find(c =>
+    c.artist?.toLowerCase() === selectedArtist?.toLowerCase() && c.date === selectedDate
+  ) || plan?.concerts?.find(c =>
     c.artist?.toLowerCase() === selectedArtist?.toLowerCase()
   ) || plan?.concerts?.find(c =>
     c.venue_name.toLowerCase().includes(selectedVenue?.toLowerCase())
