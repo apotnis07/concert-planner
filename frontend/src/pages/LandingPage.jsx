@@ -42,7 +42,7 @@ export default function LandingPage() {
         }}
       >
         {/* Grain overlay */}
-        <div
+        {/* <div
           style={{
             position: 'absolute',
             inset: 0,
@@ -51,7 +51,7 @@ export default function LandingPage() {
             opacity: 0.03,
             pointerEvents: 'none',
           }}
-        />
+        /> */}
 
         {/* Headline block */}
         <div style={{ position: 'relative', zIndex: 10, maxWidth: '64rem', padding: '0 1.5rem', textAlign: 'center' }}>
