@@ -290,6 +290,14 @@ function DirectionsCard({ directions }) {
   const transit = directions?.find(d => d.mode === 'transit' && d.available)
   const driving = directions?.find(d => d.mode === 'driving' && d.available)
 
+  const primaryVehicle = transit.steps?.find(s => s.vehicle !== 'WALK')?.vehicle || 'Transit';
+  const modeLabel = {
+    'SUBWAY': 'Subway',
+    'BUS': 'Bus',
+    'RAIL': 'Train',
+    'TRANSIT': 'Transit'
+  }[primaryVehicle] || 'Transit';
+
   if (!transit && !driving) return (
     <EmptyCard title="Getting There" icon="directions_car" message="Directions unavailable." />
   )
@@ -329,7 +337,7 @@ function DirectionsCard({ directions }) {
                   <span className="material-symbols-outlined" style={{ fontSize: '1rem', color: '#BCCBB9' }}>chevron_right</span>
                 </div>
               </div>
-              <p style={{ fontSize: '0.75rem', color: '#BCCBB9' }}>{transit.distance} • CTA • Tap for steps</p>
+              <p style={{ fontSize: '0.75rem', color: '#BCCBB9' }}>{transit.distance} • {modeLabel} • Tap for steps</p>
             </div>
           )}
 
@@ -654,12 +662,12 @@ export default function ResultsPage() {
   const [currentStep, setCurrentStep] = useState(0)
 
   const hasFetched = useRef(false);
+  const prefs = JSON.parse(sessionStorage.getItem('nop_preferences') || '{}')
+  const displayCity = prefs.city || 'Chicago';
 
   useEffect(() => {
     const token = sessionStorage.getItem('nop_access_token')
-    const prefs = JSON.parse(sessionStorage.getItem('nop_preferences') || '{}')
     
-    const displayCity = prefs.city || 'Chicago';
 
     if (!token) {
       navigate('/')
