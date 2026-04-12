@@ -88,6 +88,9 @@ def plan(
         result = graph.invoke(initial_state)
         return result
     except Exception as e:
+        print(f"CRITICAL ERROR: {str(e)}") # This will show in your terminal
+        import traceback
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
     
 

@@ -31,7 +31,7 @@ function Navbar() {
             fontWeight: 700,
             letterSpacing: '-0.05em',
             color: '#E5E2E1',
-            fontFamily: "'Space Grotesk', sans-serif",
+            fontFamily: "'Plus Jakarta Sans', sans-serif",
           }}
         >
           <a href="/">THE SONIC CURATOR</a>
@@ -100,7 +100,8 @@ export default function PreferencesPage() {
 
   const handleSubmit = async () => {
     if (!accessToken) {
-      setError('No Spotify token found. Please connect Spotify first.')
+      // setError('No Spotify token found. Please connect Spotify first.')
+      navigate('/');
       return
     }
     setLoading(true)
@@ -329,7 +330,7 @@ export default function PreferencesPage() {
                   boxShadow: '0 8px 30px rgba(29,185,84,0.2)',
                   transition: 'all 0.2s',
                 }}
-                onMouseEnter={e => { if (!loading) e.currentTarget.style.filter = 'brightness(1.1)' }}
+                onMouseEnter={e => { if (!loading) e.currentTarget.style.filter = 'brightness(1.05)' }}
                 onMouseLeave={e => { e.currentTarget.style.filter = 'brightness(1)' }}
               >
                 {loading ? 'Planning your night...' : 'Plan My Night'}

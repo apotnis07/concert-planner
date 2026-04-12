@@ -79,7 +79,7 @@ export default function LandingPage() {
               fontFamily: "'Inter', sans-serif",
             }}
           >
-            Connect Spotify. Discover concerts. Get directions, dinner, and a cost estimate — instantly.
+            Connect Spotify. Discover concerts. Get directions, dinner recommendations, and a cost estimate — instantly.
           </p>
 
           {/* CTA */}

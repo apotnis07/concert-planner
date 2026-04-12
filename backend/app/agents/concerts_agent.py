@@ -1,4 +1,4 @@
-import httpx, json
+import httpx, json, time
 
 from app.config import settings
 from app.graph.state import State
@@ -34,6 +34,7 @@ def get_concerts_for_artists(artist_names: list[str], city: str) -> list[dict]:
 
     with httpx.Client() as client:
         for artist in artist_names:
+            time.sleep(0.25)
             params = {
                 "apikey": settings.ticketmaster_api_key,
                 "keyword": artist,

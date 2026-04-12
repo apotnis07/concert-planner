@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import ReactMarkdown from 'react-markdown'
 import apiClient from '../api/client'
@@ -22,7 +22,7 @@ function Navbar({ displayName }) {
       }}
     >
       <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-        <span style={{ fontSize: '1.5rem', fontWeight: 700, letterSpacing: '-0.05em', fontFamily: "'Space Grotesk', sans-serif" }}>
+        <span style={{ fontSize: '1.5rem', fontWeight: 700, letterSpacing: '-0.05em', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
           <a href="/">THE SONIC CURATOR</a>
         </span>
       </div>
@@ -110,7 +110,7 @@ function ConcertCard({ concert }) {
   if (!concert) return <EmptyCard title="The Show" icon="music_note" message="No upcoming concerts found for your followed artists in Chicago." />
   return (
     <div style={cardStyle}>
-      <div>
+      <div >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
           <div>
             <h3 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '1.75rem', fontWeight: 700, lineHeight: 1.1, marginBottom: '0.25rem' }}>
@@ -236,15 +236,19 @@ function DirectionsModal({ mode, data, onClose }) {
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flexShrink: 0 }}>
                 <div style={{
                   width: '1.75rem', height: '1.75rem', borderRadius: '9999px',
-                  backgroundColor: isTransit && step.line ? accentColor : '#2a2931',
+                  // backgroundColor: isTransit && step.line ? accentColor : '#2a2931',
+                  backgroundColor: step.vehicle === 'BUS' ? '#1DB954' : (isTransit && step.line ? accentColor : '#2a2931'),
                   border: `2px solid ${isTransit && step.line ? accentColor : '#474554'}`,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   fontSize: '0.65rem', fontWeight: 700,
                   color: isTransit && step.line ? '#000' : '#BCCBB9',
                   flexShrink: 0, marginTop: '0.75rem',
                 }}>
-                  {isTransit && step.line ? step.line : i + 1}
-                </div>
+                  {step.vehicle === 'WALK' ? (
+                    <span className="material-symbols-outlined" style={{ fontSize: '1rem' }}>directions_walk</span>
+                  ) : (
+                    isTransit && step.line ? step.line : i + 1
+                  )}                </div>
                 {i < (data.steps.length - 1) && (
                   <div style={{ width: '2px', flexGrow: 1, minHeight: '1.5rem', backgroundColor: '#2a2931', margin: '2px 0' }} />
                 )}
@@ -305,7 +309,7 @@ function DirectionsCard({ directions }) {
               onClick={() => setModal('transit')}
               style={{
                 position: 'relative', padding: '1rem',
-                borderRadius: '0.5rem', backgroundColor: '#201f27',
+                borderRadius: '0.5rem', backgroundColor: '#231F1E',
                 border: '1px solid rgba(29,185,84,0.3)',
                 cursor: 'pointer', transition: 'background-color 0.2s',
               }}
@@ -390,7 +394,7 @@ function CostCard({ costEstimate }) {
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
         {[
           { label: 'Tickets', data: breakdown.ticket },
-          { label: 'Transport', data: { min: Math.min(breakdown.transport?.transit.min, breakdown.transport?.driving.min), max: Math.max(breakdown.transport?.transit.max, breakdown.transport?.driving.max)}},
+          { label: 'Transport', data: { min: Math.min(breakdown.transport?.transit.min, breakdown.transport?.driving.min), max: Math.max(breakdown.transport?.transit.max, breakdown.transport?.driving.max) } },
           { label: 'Dinner', data: breakdown.dinner },
         ].map(({ label, data }) => (
           <div key={label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(71,69,84,0.3)', paddingBottom: '0.5rem' }}>
@@ -419,7 +423,7 @@ function RestaurantSection({ restaurants }) {
 
   return (
     <section style={{ marginBottom: '3rem' }}>
-      <h3 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '1.5rem', fontWeight: 700, marginBottom: '1.5rem' }}>Food</h3>
+      <h3 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '1.5rem', fontWeight: 700, marginBottom: '1.5rem', color: '#E5E2E1' }}>Food</h3>
       <div
         style={{
           display: 'flex',
@@ -433,57 +437,102 @@ function RestaurantSection({ restaurants }) {
           <div
             key={i}
             style={{
-              minWidth: '300px',
-              backgroundColor: '#2a2931',
+              width: '320px',
+              backgroundColor: '#141414', // Matches ConcertCard background
+              border: '2px solid rgba(71,69,84,0.2)', // Matches ConcertCard border
               borderRadius: '0.75rem',
-              overflow: 'hidden',
+              padding: '1.5rem', // Consistent padding with ConcertCard
               scrollSnapAlign: 'start',
-              border: '1px solid rgba(71,69,84,0.15)',
               flexShrink: 0,
+              position: 'relative',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between'
             }}
           >
-            {/* Image placeholder */}
-            <div style={{ height: '10rem', backgroundColor: '#201f27', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <span className="material-symbols-outlined" style={{ fontSize: '3rem', color: '#474554' }}>restaurant</span>
-              <div
-                style={{
-                  position: 'absolute',
-                  top: '1rem',
-                  right: '1rem',
-                  backgroundColor: r.open_now ? '#1DB954' : '#35343c',
-                  color: r.open_now ? '#000' : '#BCCBB9',
-                  fontSize: '0.625rem',
-                  fontWeight: 700,
-                  padding: '3px 10px',
-                  borderRadius: '9999px',
-                  textTransform: 'uppercase',
-                }}
-              >
-                {r.open_now ? 'Open now' : 'Check hours'}
+            {/* Status Badge (Top Right) */}
+            <div
+              style={{
+                position: 'absolute',
+                top: '1.5rem',
+                right: '1.5rem',
+                backgroundColor: r.open_now ? 'rgba(29,185,84,0.15)' : 'rgba(71,69,84,0.3)',
+                color: r.open_now ? '#1DB954' : '#BCCBB9',
+                fontSize: '0.65rem',
+                fontWeight: 700,
+                padding: '0.25rem 0.75rem',
+                borderRadius: '9999px',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em'
+              }}
+            >
+              {r.open_now ? 'Open now' : 'Closed'}
+            </div>
+
+            {/* Header: Type + Name */}
+            <div style={{ marginBottom: '1rem', paddingRight: '5rem' }}>
+              <p style={{
+                fontSize: '0.7rem', fontWeight: 700, letterSpacing: '0.1em',
+                textTransform: 'uppercase', color: '#1DB954', marginBottom: '0.25rem',
+              }}>
+                {r.type || 'Restaurant'}
+              </p>
+              <h4 style={{
+                fontFamily: "'Space Grotesk', sans-serif", fontSize: '1.25rem',
+                fontWeight: 700, lineHeight: 1.2, color: '#E5E2E1', margin: 0,
+                display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden'
+              }}>
+                {r.name}
+              </h4>
+            </div>
+
+            {/* Details: Price + Rating */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1.5rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#BCCBB9', fontSize: '0.875rem' }}>
+                <span className="material-symbols-outlined" style={{ fontSize: '1.1rem' }}>payments</span>
+                <span>Price: {r.price || 'N/A'}</span>
+              </div>
+
+              {r.rating && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#ffb965', fontSize: '0.875rem' }}>
+                  <span className="material-symbols-outlined" style={{ fontSize: '1.1rem', fontVariationSettings: "'FILL' 1" }}>star</span>
+                  <span style={{ fontWeight: 700 }}>{r.rating} / 5.0</span>
+                </div>
+              )}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#BCCBB9', fontSize: '0.875rem' }}>
+                <span className="material-symbols-outlined" style={{ fontSize: '1.1rem' }}>location_on</span>
+                <span>{r.address || ''}</span>
               </div>
             </div>
-            <div style={{ padding: '1.25rem' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.5rem' }}>
-                <h4 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '1.125rem', fontWeight: 700 }}>{r.name}</h4>
-                {r.rating && (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', color: '#ffb965' }}>
-                    <span className="material-symbols-outlined" style={{ fontSize: '1rem', fontVariationSettings: "'FILL' 1" }}>star</span>
-                    <span style={{ fontSize: '0.875rem', fontWeight: 700 }}>{r.rating}</span>
-                  </div>
-                )}
-              </div>
-              <p style={{ color: '#BCCBB9', fontSize: '0.875rem', marginBottom: '1rem' }}>
-                {r.type} • {r.price}
-              </p>
+            {/* Footer: Action Link */}
+            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
               {r.google_maps_url && (
                 <a
                   href={r.google_maps_url}
                   target="_blank"
                   rel="noreferrer"
-                  style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none', color: '#c8bfff' }}
+                  style={{
+                    display: 'inline-flex', // Keeps it tight to the content
+                    alignItems: 'center',
+                    gap: '0.4rem', 
+                    textDecoration: 'none', 
+                    color: '#BCCBB9', 
+                    fontSize: '0.75rem',
+                    borderBottom: '1px solid transparent', // The "invisible" line
+                    paddingBottom: '2px', // Space between text and line
+                    transition: 'all 0.3s ease'
+                  }}
+                  onMouseEnter={e => {
+                    e.currentTarget.style.color = '#F8FAFC';
+                    e.currentTarget.style.borderBottomColor = '#F8FAFC'; // Animates the line in
+                  }}
+                  onMouseLeave={e => {
+                    e.currentTarget.style.color = '#BCCBB9';
+                    e.currentTarget.style.borderBottomColor = 'transparent'; // Hides the line
+                  }}
                 >
-                  <span className="material-symbols-outlined" style={{ fontSize: '1rem' }}>map</span>
-                  <span style={{ fontSize: '0.75rem', textDecoration: 'underline', textUnderlineOffset: '4px' }}>Open in Google Maps</span>
+                  <span className="material-symbols-outlined" style={{ fontSize: '1rem' }}>near_me</span>
+                  <span>Directions</span>
                 </a>
               )}
             </div>
@@ -495,86 +544,86 @@ function RestaurantSection({ restaurants }) {
 }
 
 // ── Refinement Bar ────────────────────────────────────────────────────────────
-function RefinementBar({ onRefine }) {
-  const [input, setInput] = useState('')
-  const suggestions = ['Find a vegetarian restaurant', 'Show a different concert', 'Cheaper transport option']
+// function RefinementBar({ onRefine }) {
+//   const [input, setInput] = useState('')
+//   const suggestions = ['Find a vegetarian restaurant', 'Show a different concert', 'Cheaper transport option']
 
-  const handleSend = () => {
-    if (!input.trim()) return
-    onRefine(input)
-    setInput('')
-  }
+//   const handleSend = () => {
+//     if (!input.trim()) return
+//     onRefine(input)
+//     setInput('')
+//   }
 
-  return (
-    <section style={{ maxWidth: '56rem', margin: '0 auto', padding: '3rem 1rem', borderTop: '1px solid rgba(71,69,84,0.15)' }}>
-      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', overflowX: 'auto', paddingBottom: '0.5rem' }}>
-        {suggestions.map(s => (
-          <button
-            key={s}
-            onClick={() => setInput(s)}
-            style={{
-              whiteSpace: 'nowrap',
-              padding: '0.5rem 1rem',
-              borderRadius: '9999px',
-              backgroundColor: '#201f27',
-              fontSize: '0.75rem',
-              fontWeight: 500,
-              border: '1px solid rgba(71,69,84,0.3)',
-              color: '#E5E2E1',
-              cursor: 'pointer',
-              transition: 'background-color 0.2s',
-            }}
-            onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#35343c')}
-            onMouseLeave={e => (e.currentTarget.style.backgroundColor = '#201f27')}
-          >
-            {s}
-          </button>
-        ))}
-      </div>
-      <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-        <input
-          type="text"
-          value={input}
-          onChange={e => setInput(e.target.value)}
-          onKeyDown={e => e.key === 'Enter' && handleSend()}
-          placeholder="Ask me to refine your plan..."
-          style={{
-            width: '100%',
-            backgroundColor: '#2a2931',
-            border: 'none',
-            borderRadius: '9999px',
-            padding: '1rem 4rem 1rem 1.5rem',
-            color: '#E5E2E1',
-            fontSize: '1rem',
-            outline: 'none',
-            boxSizing: 'border-box',
-          }}
-        />
-        <button
-          onClick={handleSend}
-          style={{
-            position: 'absolute',
-            right: '0.5rem',
-            padding: '0.625rem',
-            backgroundColor: '#1DB954',
-            color: '#000',
-            borderRadius: '9999px',
-            border: 'none',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            transition: 'transform 0.2s',
-          }}
-          onMouseEnter={e => (e.currentTarget.style.transform = 'scale(1.05)')}
-          onMouseLeave={e => (e.currentTarget.style.transform = 'scale(1)')}
-        >
-          <span className="material-symbols-outlined">send</span>
-        </button>
-      </div>
-    </section>
-  )
-}
+//   return (
+//     <section style={{ maxWidth: '56rem', margin: '0 auto', padding: '3rem 1rem', borderTop: '1px solid rgba(71,69,84,0.15)' }}>
+//       <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', overflowX: 'auto', paddingBottom: '0.5rem' }}>
+//         {suggestions.map(s => (
+//           <button
+//             key={s}
+//             onClick={() => setInput(s)}
+//             style={{
+//               whiteSpace: 'nowrap',
+//               padding: '0.5rem 1rem',
+//               borderRadius: '9999px',
+//               backgroundColor: '#201f27',
+//               fontSize: '0.75rem',
+//               fontWeight: 500,
+//               border: '1px solid rgba(71,69,84,0.3)',
+//               color: '#E5E2E1',
+//               cursor: 'pointer',
+//               transition: 'background-color 0.2s',
+//             }}
+//             onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#35343c')}
+//             onMouseLeave={e => (e.currentTarget.style.backgroundColor = '#201f27')}
+//           >
+//             {s}
+//           </button>
+//         ))}
+//       </div>
+//       <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+//         <input
+//           type="text"
+//           value={input}
+//           onChange={e => setInput(e.target.value)}
+//           onKeyDown={e => e.key === 'Enter' && handleSend()}
+//           placeholder="Ask me to refine your plan..."
+//           style={{
+//             width: '100%',
+//             backgroundColor: '#2a2931',
+//             border: 'none',
+//             borderRadius: '9999px',
+//             padding: '1rem 4rem 1rem 1.5rem',
+//             color: '#E5E2E1',
+//             fontSize: '1rem',
+//             outline: 'none',
+//             boxSizing: 'border-box',
+//           }}
+//         />
+//         <button
+//           onClick={handleSend}
+//           style={{
+//             position: 'absolute',
+//             right: '0.5rem',
+//             padding: '0.625rem',
+//             backgroundColor: '#1DB954',
+//             color: '#000',
+//             borderRadius: '9999px',
+//             border: 'none',
+//             cursor: 'pointer',
+//             display: 'flex',
+//             alignItems: 'center',
+//             justifyContent: 'center',
+//             transition: 'transform 0.2s',
+//           }}
+//           onMouseEnter={e => (e.currentTarget.style.transform = 'scale(1.05)')}
+//           onMouseLeave={e => (e.currentTarget.style.transform = 'scale(1)')}
+//         >
+//           <span className="material-symbols-outlined">send</span>
+//         </button>
+//       </div>
+//     </section>
+//   )
+// }
 
 // ── Empty Card ────────────────────────────────────────────────────────────────
 function EmptyCard({ title, icon, message }) {
@@ -604,6 +653,8 @@ export default function ResultsPage() {
   const [error, setError] = useState('')
   const [currentStep, setCurrentStep] = useState(0)
 
+  const hasFetched = useRef(false);
+
   useEffect(() => {
     const token = sessionStorage.getItem('nop_access_token')
     const prefs = JSON.parse(sessionStorage.getItem('nop_preferences') || '{}')
@@ -620,9 +671,11 @@ export default function ResultsPage() {
         clearInterval(stepInterval)
         return prev
       })
-    }, 3500)
+    }, 900)
 
     const fetchPlan = async () => {
+
+
       try {
         const selectedConcert = JSON.parse(sessionStorage.getItem('nop_selected_concert') || 'null')
 
@@ -651,9 +704,15 @@ export default function ResultsPage() {
       }
     }
 
-    fetchPlan()
-    return () => clearInterval(stepInterval)
-  }, [navigate])
+    if (!hasFetched.current) {
+      hasFetched.current = true;
+      fetchPlan();
+    }
+
+    return () => {
+      if (stepInterval) clearInterval(stepInterval);
+    };
+  }, [navigate]) // Added navigate for safety, though [] works too
 
   const handleRefine = (prompt) => {
     // Placeholder — wired up properly in Module 10
@@ -662,7 +721,7 @@ export default function ResultsPage() {
   }
 
   if (loading) return (
-    <div style={{ backgroundColor: '#0e0d15', color: '#E5E2E1', minHeight: '100vh', fontFamily: "'Inter', sans-serif" }}>
+    <div style={{ backgroundColor: '#0A0A0A', color: '#E5E2E1', minHeight: '100vh', fontFamily: "'Inter', sans-serif" }}>
       <Navbar />
       <LoadingState steps={LOADING_STEPS} currentStep={currentStep} />
     </div>
@@ -680,11 +739,31 @@ export default function ResultsPage() {
     </div>
   )
 
-  const topConcert = plan?.concerts?.[0]
-  const today = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })
+  const selectedConcertData = JSON.parse(sessionStorage.getItem('nop_selected_concert') || '{}');
 
+  const selectedVenue = selectedConcertData.venue_name;
+
+  const topConcert = plan.concerts?.find(c =>
+    c.venue_name.toLowerCase().includes(selectedVenue?.toLowerCase())
+  ) || plan.concerts?.[0]
+
+  // const topConcert = plan?.concerts?.[0]
+  // const today = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })
+
+  const formatDate = (dateString) => {
+    if (!dateString) return "";
+    
+    // Use 'UTC' to prevent the date from shifting back a day due to local timezone offsets
+    const date = new Date(dateString + 'T00:00:00'); 
+    
+    return date.toLocaleDateString('en-US', {
+      month: 'long', // "May" (use 'short' for "May.")
+      day: 'numeric', // "25"
+    });
+  };
+  
   return (
-    <div style={{ backgroundColor: '#0e0d15', color: '#E5E2E1', minHeight: '100vh', fontFamily: "'Inter', sans-serif" }}>
+    <div style={{ backgroundColor: '#0A0A0A', color: '#E5E2E1', minHeight: '100vh', fontFamily: "'Inter', sans-serif" }}>
       <Navbar />
 
       <main style={{ marginTop: '5rem', padding: '2rem 3rem', maxWidth: '80rem', margin: '5rem auto 0' }}>
@@ -695,7 +774,7 @@ export default function ResultsPage() {
             Your Night Out Plan
           </h1>
           <p style={{ color: '#BCCBB9', fontSize: '1.25rem' }}>
-            Planned for Chicago • {today}
+          <span>Planned for Chicago • {formatDate(selectedConcertData.date)}</span>
           </p>
         </header>
 
@@ -704,7 +783,7 @@ export default function ResultsPage() {
           <section style={{ marginBottom: '3rem' }}>
             <div
               style={{
-                backgroundColor: '#201f27',
+                backgroundColor: '#141414',
                 borderLeft: '4px solid #c8bfff',
                 borderRadius: '0.75rem',
                 padding: '2rem',
@@ -761,7 +840,7 @@ export default function ResultsPage() {
         <RestaurantSection restaurants={plan?.restaurants} />
 
         {/* Section 4 — Refinement */}
-        <RefinementBar onRefine={handleRefine} />
+        {/* <RefinementBar onRefine={handleRefine} /> */}
 
         {/* Errors / warnings */}
         {plan?.errors?.length > 0 && (
@@ -777,10 +856,9 @@ export default function ResultsPage() {
     </div>
   )
 }
-
 // ── Shared style ──────────────────────────────────────────────────────────────
 const cardStyle = {
-  backgroundColor: '#2a2931',
+  backgroundColor: '#141414',
   borderRadius: '0.75rem',
   padding: '1.5rem',
   border: '1px solid rgba(71,69,84,0.15)',

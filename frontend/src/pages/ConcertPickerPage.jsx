@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import apiClient from '../api/client'
 
@@ -13,12 +13,12 @@ function Navbar() {
       padding: '1rem 2rem',
       display: 'flex', justifyContent: 'space-between', alignItems: 'center',
     }}>
-      <span style={{ fontSize: '1.5rem', fontWeight: 700, letterSpacing: '-0.05em', fontFamily: "'Space Grotesk', sans-serif" }}>
+      <span style={{ fontSize: '1.5rem', fontWeight: 700, letterSpacing: '-0.05em', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
         <a href="/">THE SONIC CURATOR</a>
       </span>
-      <span className="material-symbols-outlined" style={{ color: '#BCCBB9', cursor: 'pointer' }}>
+      {/* <span className="material-symbols-outlined" style={{ color: '#BCCBB9', cursor: 'pointer' }}>
         account_circle
-      </span>
+      </span> */}
     </nav>
   )
 }
@@ -110,12 +110,15 @@ function ConcertCard({ concert, selected, onClick }) {
           <span></span>
         )}
         {concert.url && (
-            <a
+          <a
             href={concert.url}
             target="_blank"
             rel="noreferrer"
             onClick={e => e.stopPropagation()}
-            style={{ color: '#BCCBB9', fontSize: '0.75rem', textDecoration: 'underline', textUnderlineOffset: '4px', transition: 'all 0.3s ease' }}
+            style={{
+              color: '#BCCBB9', fontSize: '0.75rem', textDecoration: 'underline', textUnderlineOffset: '4px', transition: 'all 0.5s ease',
+              position: 'absolute', bottom: '1.5rem', right: '1rem',
+            }}
             onMouseEnter={(e) => {
               e.currentTarget.style.color = '#F8FAFC'; // Brighten text color on hover
               e.currentTarget.style.textShadow = '0 0 8px #BCCBB9, 0 0 12px rgba(188, 203, 185, 0.4)';
@@ -153,25 +156,27 @@ function EmptyState({ artists }) {
           {artists.length > 5 ? ` and ${artists.length - 5} more` : ''}
         </p>
       )}
-      <button
-        onClick={() => navigate('/preferences')}
-        style={{
-          backgroundColor: '#1DB954', color: '#000', fontWeight: 700,
-          padding: '0.75rem 1.5rem', borderRadius: '9999px',
-          border: 'none', cursor: 'pointer',
-          fontFamily: "'Space Grotesk', sans-serif",
-        }}
-      >
-        ← Back to Preferences
-      </button>
+      <div style={{ display: 'flex', justifyContent: 'center', marginTop: '2rem' }}>
+        <button
+          onClick={() => navigate('/preferences')}
+          style={{
+            backgroundColor: '#1DB954', color: '#000', fontWeight: 700, fontSize: '1rem',
+            padding: '0.75rem 1.5rem', borderRadius: '9999px',
+            border: 'none', cursor: 'pointer',
+            fontFamily: "'Space Grotesk', sans-serif",
+            display: 'flex', alignItems: 'center', gap: '0.5rem',
+          }}
+        >
+          <span className="material-symbols-outlined">arrow_back</span>
+          Back to Preferences
+        </button>
+      </div>
     </div>
   )
 }
 
 // ── Main Component ────────────────────────────────────────────────────────────
 export default function ConcertPickerPage() {
-
-  console.log('ConcertPickerPage mounted')
 
   const navigate = useNavigate()
   const [concerts, setConcerts] = useState([])
@@ -180,12 +185,14 @@ export default function ConcertPickerPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
+  const hasFetched = useRef(false);
+
   useEffect(() => {
     const token = sessionStorage.getItem('nop_access_token')
     const prefs = JSON.parse(sessionStorage.getItem('nop_preferences') || '{}')
 
     // Clear any previously selected concert so user always picks fresh
-    sessionStorage.removeItem('nop_selected_concert') 
+    sessionStorage.removeItem('nop_selected_concert')
 
     if (!token) { navigate('/'); return }
 
@@ -204,6 +211,8 @@ export default function ConcertPickerPage() {
       }
     }
 
+    if (hasFetched.current) return
+    hasFetched.current = true
     fetchConcerts()
   }, [navigate])
 

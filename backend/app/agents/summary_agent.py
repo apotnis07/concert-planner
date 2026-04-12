@@ -1,6 +1,7 @@
 import anthropic
 from app.config import settings
 from app.graph.state import State
+import sys
 
 client = anthropic.Anthropic(api_key=settings.anthropic_api_key)
 
@@ -8,6 +9,14 @@ def _build_summary_prompt(state: State) -> str:
     """
     Build a comprehensive prompt from the full state for Claude to summarize.
     """
+    print("\n--- STATE DATA COUNTS ---")
+    for key in ['concerts', 'restaurants', 'directions', 'followed_artists']:
+        data = state.get(key, [])
+        print(f"{key}: {len(data)} items")
+        if data:
+            # Check the size of the first item to see if it's a giant dict
+            print(f"  First {key} item size: {sys.getsizeof(str(data[0])) / 1024:.2f} KB")
+            
     artists = state.get("followed_artists", [])
     concerts = state.get("concerts", [])
     directions = state.get("directions", [])
@@ -20,7 +29,17 @@ def _build_summary_prompt(state: State) -> str:
     artists_str = ", ".join(artist_names) if artist_names else "Unknown"
 
     # Concert
-    top_concert = concerts[0] if concerts else None
+    concerts = state.get("concerts", [])
+    selected_venue = state.get("selected_venue_name", "")
+
+    top_concert = None
+    if selected_venue:
+        top_concert = next(
+            (c for c in concerts if selected_venue.lower() in c.get("venue_name", "").lower()), 
+            None
+        )
+    if not top_concert and concerts:
+        top_concert = concerts[0]
     concert_str = "No upcoming concerts found in Chicago." if not top_concert else f"""
     - Event: {top_concert.get("event_name")}
     - Artist: {top_concert.get("artist")}
@@ -70,38 +89,35 @@ def _build_summary_prompt(state: State) -> str:
     )
 
     prompt = f"""
-    You are a friendly and knowledgeable Chicago night-out planner. 
-    Based on the data below, write an exciting and practical night out plan for the user.
+    You are a friendly Chicago night-out planner. 
+    Write a concise, exciting night out plan using the data below.
 
-    ## User's Followed Artists (from Spotify)
-    {artists_str}
+    ## IMPORTANT
+    Focus EXCLUSIVELY on the concert at {top_concert.get('venue_name') if top_concert else 'the venue'}. 
+    Ignore any other festival dates or locations.
 
-    ## Concert
-    {concert_str}
+    ## Context
+    Artists: {artists_str}
+    Concert: {concert_str}
+    Directions: {directions_str}
+    Food: {restaurants_str}
+    Costs: {cost_str}
+    Warnings: {errors_str}
 
-    ## Getting There (from Chicago Union Station)
-    {directions_str}
+    ## Hard Constraints for Cost Efficiency
+    - **Maximum Length:** Do not exceed 200 words total.
+    - **Structure:** Use exactly one short paragraph per section.
+    - **No Fluff:** Skip introductory "I'd be happy to help" or concluding "Have a great night" pleasantries.
+    - **Formatting:** Use plain paragraphs with markdown headers.
 
-    ## Top Restaurant Recommendations Near the Venue
-    {restaurants_str}
+    ## Sections
+    1. **The Show** — Briefly highlight the artist, venue, and time.
+    2. **Getting There** — Give one clear transit recommendation.
+    3. **Dinner** — Recommend the top restaurant pick and why it fits.
+    4. **Budget** — State the total range and the primary cost driver.
+    5. **Quick Tips** — Provide two brief, practical Chicago tips.
 
-    ## Cost Estimate
-    {cost_str}
-
-    ## Data Warnings (some data may have been unavailable)
-    {errors_str}
-
-    ## Instructions
-    Write a warm, engaging night out plan in plain English. Structure it with these sections:
-    1. **The Show** — highlight the concert, artist, venue, date/time, and where to get tickets
-    2. **Getting There** — summarize both transport options, give a recommendation
-    3. **Dinner After** — recommend the top restaurant pick with a sentence about why
-    4. **What It'll Cost** — give the total range and what drives the cost
-    5. **Quick Tips** — 2-3 practical Chicago-specific tips for the night (parking, arriving early, etc.)
-
-    Keep the tone conversational and helpful, like a knowledgeable friend planning the night with them.
-    If any data was missing or unavailable, acknowledge it naturally without being robotic about it.
-    Do not use JSON. Write in plain paragraphs with markdown headers.
+    Tone: Conversational but highly efficient. If data is missing, mention it briefly and move on.
     """.strip()
 
     return prompt
@@ -117,15 +133,27 @@ def get_summary(state: State) -> str:
 #     Falls back to a plain text summary if Claude is unavailable.
 #     """
 #     prompt = _build_summary_prompt(state)
-
+#     # --- DEBUG START ---
+#     import sys
+#     char_count = len(prompt)
+#     estimated_tokens = char_count / 4  # Rough LLM estimate
+#     print("\n--- SUMMARY PROMPT DEBUG ---")
+#     print(f"Total Characters: {char_count}")
+#     print(f"Estimated Tokens: {estimated_tokens}")
+#     print(f"Memory Size: {sys.getsizeof(prompt) / 1024:.2f} KB")
+#     # --- DEBUG END ---
 #     try:
 #         message = client.messages.create(
-#             model="claude-sonnet-4-20250514",
-#             max_tokens=1024,
+#             model="claude-haiku-4-5-20251001",
+#             max_tokens=800,
+#             temperature=0.7,
 #             messages=[
 #                 {"role": "user", "content": prompt}
 #             ]
 #         )
+#         print("\n--- ANTHROPIC BILLING ---")
+#         print(f"Input Tokens: {message.usage.input_tokens}")
+#         print(f"Output Tokens: {message.usage.output_tokens}")
 #         return message.content[0].text.strip()
 
 #     except Exception as e:
@@ -139,7 +167,20 @@ def _fallback_summary(state: State) -> str:
     restaurants = state.get("restaurants", [])
     cost = state.get("cost_estimate", {})
 
-    top_concert = concerts[0] if concerts else None
+
+    # Concert
+    concerts = state.get("concerts", [])
+    selected_venue = state.get("selected_venue_name", "")
+
+    top_concert = None
+    if selected_venue:
+        top_concert = next(
+            (c for c in concerts if selected_venue.lower() in c.get("venue_name", "").lower()), 
+            None
+        )
+    if not top_concert:
+        top_concert = concerts[0] if concerts else None
+    
     top_restaurant = restaurants[0] if restaurants else None
     total = cost.get("breakdown", {}).get("total", {})
 

@@ -146,7 +146,7 @@ def _parse_steps(steps: list, mode: str) -> list[dict]:
                 import re
                 instruction = re.sub(r'<[^>]+>', '', nav.get('instructions', ''))
                 parsed.append({
-                    'instruction': f"🚶 {instruction}",
+                    'instruction': f"{instruction}",
                     'line': None,
                     'vehicle': 'WALK',
                     'departure_stop': None,
