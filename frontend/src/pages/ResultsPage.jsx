@@ -646,7 +646,7 @@ function EmptyCard({ title, icon, message }) {
 // ── Loading Steps ─────────────────────────────────────────────────────────────
 const LOADING_STEPS = [
   'Reading your Spotify artists...',
-  'Finding upcoming concerts in Chicago...',
+  'Finding upcoming concerts in your city...',
   'Getting directions to the venue...',
   'Finding restaurants nearby...',
   'Estimating costs...',

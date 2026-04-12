@@ -186,10 +186,11 @@ export default function ConcertPickerPage() {
   const [error, setError] = useState('')
 
   const hasFetched = useRef(false);
+  const prefs = JSON.parse(sessionStorage.getItem('nop_preferences') || '{}')
+  const displayCity = prefs.city || 'Chicago';
 
   useEffect(() => {
     const token = sessionStorage.getItem('nop_access_token')
-    const prefs = JSON.parse(sessionStorage.getItem('nop_preferences') || '{}')
 
     // Clear any previously selected concert so user always picks fresh
     sessionStorage.removeItem('nop_selected_concert')
@@ -245,7 +246,7 @@ export default function ConcertPickerPage() {
             {loading
               ? 'Searching Ticketmaster for your artists...'
               : concerts.length > 0
-                ? `Found ${concerts.length} upcoming show${concerts.length > 1 ? 's' : ''} in Chicago`
+                ? `Found ${concerts.length} upcoming show${concerts.length > 1 ? 's' : ''} in ${displayCity}`
                 : 'No shows found'
             }
           </p>
