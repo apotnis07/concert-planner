@@ -31,13 +31,22 @@ def _build_summary_prompt(state: State) -> str:
     # Concert
     concerts = state.get("concerts", [])
     selected_venue = state.get("selected_venue_name", "")
+    selected_artist = state.get("selected_artist", "")  
 
-    top_concert = None
-    if selected_venue:
+    if selected_artist:
+        top_concert = next(
+            (c for c in concerts if selected_artist.lower() in c.get("artist", "").lower()), 
+            None
+        )
+
+    # 2. Fall back to venue name if artist isn't found
+    if not top_concert and selected_venue:
         top_concert = next(
             (c for c in concerts if selected_venue.lower() in c.get("venue_name", "").lower()), 
             None
         )
+
+    # 3. Final safety fallback
     if not top_concert and concerts:
         top_concert = concerts[0]
     concert_str = "No upcoming concerts found in Chicago." if not top_concert else f"""
@@ -171,13 +180,21 @@ def _fallback_summary(state: State) -> str:
     # Concert
     concerts = state.get("concerts", [])
     selected_venue = state.get("selected_venue_name", "")
-
+    selected_artist = state.get("selected_artist", "")
+    print(f"DEBUG: Selected Artist in State is: {state.get('selected_artist')}")
     top_concert = None
-    if selected_venue:
+    if selected_artist:
+        top_concert = next(
+            (c for c in concerts if selected_artist.lower() in c.get("artist", "").lower()), 
+            None
+        )
+    
+    if not top_concert and selected_venue:
         top_concert = next(
             (c for c in concerts if selected_venue.lower() in c.get("venue_name", "").lower()), 
             None
         )
+        
     if not top_concert:
         top_concert = concerts[0] if concerts else None
     
@@ -187,7 +204,8 @@ def _fallback_summary(state: State) -> str:
     lines = ["## Your Night Out Plan\n"]
 
     if top_concert:
-        lines.append(f"**The Show:** {top_concert.get('event_name')} at {top_concert.get('venue_name')} on {top_concert.get('date')}.")
+        actual_artist = top_concert.get('artist', selected_artist)
+        lines.append(f"**The Show:** {actual_artist} at {top_concert.get('event_name')} — {top_concert.get('venue_name')} on {top_concert.get('date')}.")
     else:
         lines.append("**The Show:** No upcoming concerts found.")
 

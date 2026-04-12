@@ -309,7 +309,7 @@ function DirectionsCard({ directions }) {
               onClick={() => setModal('transit')}
               style={{
                 position: 'relative', padding: '1rem',
-                borderRadius: '0.5rem', backgroundColor: '#231F1E',
+                borderRadius: '0.5rem', backgroundColor: '#201f27',
                 border: '1px solid rgba(29,185,84,0.3)',
                 cursor: 'pointer', transition: 'background-color 0.2s',
               }}
@@ -514,9 +514,9 @@ function RestaurantSection({ restaurants }) {
                   style={{
                     display: 'inline-flex', // Keeps it tight to the content
                     alignItems: 'center',
-                    gap: '0.4rem', 
-                    textDecoration: 'none', 
-                    color: '#BCCBB9', 
+                    gap: '0.4rem',
+                    textDecoration: 'none',
+                    color: '#BCCBB9',
                     fontSize: '0.75rem',
                     borderBottom: '1px solid transparent', // The "invisible" line
                     paddingBottom: '2px', // Space between text and line
@@ -692,6 +692,8 @@ export default function ResultsPage() {
             selected_venue_address: selectedConcert?.venue_address || '',
             selected_venue_lat: selectedConcert?.venue_lat || '',
             selected_venue_lng: selectedConcert?.venue_lng || '',
+            selected_artist: selectedConcert?.artist || '',
+
           },
         })
         setPlan(res.data)
@@ -743,25 +745,34 @@ export default function ResultsPage() {
 
   const selectedVenue = selectedConcertData.venue_name;
 
-  const topConcert = plan.concerts?.find(c =>
+  const selectedArtist = selectedConcertData.artist;
+
+  // 2. Update the search logic to prioritize the artist name over the venue
+  const topConcert = plan?.concerts?.find(c =>
+    c.artist?.toLowerCase() === selectedArtist?.toLowerCase()
+  ) || plan?.concerts?.find(c =>
     c.venue_name.toLowerCase().includes(selectedVenue?.toLowerCase())
-  ) || plan.concerts?.[0]
+  ) || plan?.concerts?.[0];
+
+  // const topConcert = plan.concerts?.find(c =>
+  //   c.venue_name.toLowerCase().includes(selectedVenue?.toLowerCase())
+  // ) || plan.concerts?.[0]
 
   // const topConcert = plan?.concerts?.[0]
   // const today = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })
 
   const formatDate = (dateString) => {
     if (!dateString) return "";
-    
+
     // Use 'UTC' to prevent the date from shifting back a day due to local timezone offsets
-    const date = new Date(dateString + 'T00:00:00'); 
-    
+    const date = new Date(dateString + 'T00:00:00');
+
     return date.toLocaleDateString('en-US', {
       month: 'long', // "May" (use 'short' for "May.")
       day: 'numeric', // "25"
     });
   };
-  
+
   return (
     <div style={{ backgroundColor: '#0A0A0A', color: '#E5E2E1', minHeight: '100vh', fontFamily: "'Inter', sans-serif" }}>
       <Navbar />
@@ -774,7 +785,7 @@ export default function ResultsPage() {
             Your Night Out Plan
           </h1>
           <p style={{ color: '#BCCBB9', fontSize: '1.25rem' }}>
-          <span>Planned for Chicago • {formatDate(selectedConcertData.date)}</span>
+            <span>Planned for Chicago • {formatDate(selectedConcertData.date)}</span>
           </p>
         </header>
 

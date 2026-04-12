@@ -18,6 +18,7 @@ class State(TypedDict):
     restaurants: list[dict]
     cost_estimate: dict
     summary: str
+    selected_artist: str
     selected_venue_name: str
     selected_venue_address: str
     selected_venue_lat: float | None
