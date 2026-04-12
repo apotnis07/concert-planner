@@ -227,5 +227,5 @@ def restaurants_node(state: State) -> State:
     return {
         **state,
         "venue_location": location,
-        "restaurants": restaurants,
+        "restaurants": filtered,
     }
