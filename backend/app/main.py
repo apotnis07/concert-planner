@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.agents.spotify_agent import get_followed_artists, get_auth_manager
 from app.graph.graph import graph
 from fastapi.responses import RedirectResponse
+import os
 
 
 app = FastAPI(title="Night Out Planner API")
@@ -10,7 +11,11 @@ app = FastAPI(title="Night Out Planner API")
 # Needed later when React frontend talks to this backend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],  # Vite default port
+    allow_origins=[
+        "http://localhost:5173",
+        "https://*.vercel.app",         
+        os.getenv("FRONTEND_URL", ""),  
+    ],    
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
