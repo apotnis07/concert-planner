@@ -15,13 +15,14 @@ export default function LandingPage() {
       console.error('Failed to get Spotify auth URL', err)
     }
   }
+  const isMobile = window.innerWidth < 768;
 
   return (
     <div
       className="bg-background selection:bg-primary selection:text-on-primary"
       style={{ backgroundColor: '#131313', color: '#E5E2E1', fontFamily: "'Inter', sans-serif", overflowX: 'hidden' }}
     >
-      
+
 
       {/* ── Hero Section ── */}
       <header
@@ -33,9 +34,9 @@ export default function LandingPage() {
           justifyContent: 'center',
           paddingTop: '5rem',
           backgroundColor: '#0a0a0a',
-        //   backgroundImage: `
-        //     radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.15) 0%, transparent 50%),
-        //     radial-gradient(circle at 0% 0%, rgba(29, 185, 84, 0.05) 0%, transparent 40%)`,
+          //   backgroundImage: `
+          //     radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.15) 0%, transparent 50%),
+          //     radial-gradient(circle at 0% 0%, rgba(29, 185, 84, 0.05) 0%, transparent 40%)`,
           overflow: 'hidden',
           position: 'relative',
         }}
@@ -67,7 +68,7 @@ export default function LandingPage() {
           >
             Your perfect night out,
             <br />
-            <span style={{ color: '#888D96'}}>planned by AI.</span>
+            <span style={{ color: '#888D96' }}>planned by AI.</span>
           </h1>
           <p
             style={{
@@ -97,8 +98,8 @@ export default function LandingPage() {
                 borderRadius: '9999px',
                 border: 'none',
                 cursor: 'pointer',
-                boxShadow: '0 0 10px rgba(29,185,84,0.2)', 
-                transition: 'box-shadow 0.7s ease',                
+                boxShadow: '0 0 10px rgba(29,185,84,0.2)',
+                transition: 'box-shadow 0.7s ease',
                 fontSize: '1rem',
                 transform: 'none',
               }}
@@ -130,15 +131,15 @@ export default function LandingPage() {
         </div>
 
         {/* Floating preview cards */}
+
         <div
           style={{
-            marginTop: '5rem',
+            marginTop: isMobile ? '2rem' : '5rem',
             width: '100%',
             maxWidth: '72rem',
-            padding: '0 1.5rem',
+            padding: '0 1rem',
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-            gap: '1.5rem',
+            gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem',
             // transform: 'rotate(1deg) translateY(3rem)',
           }}
         >
@@ -173,11 +174,11 @@ export default function LandingPage() {
               key={card.title}
               style={{
                 backgroundColor: '#2a2a2a',
-                padding: '1.5rem',
+                padding: '1.25rem',
                 borderRadius: '0.75rem',
                 boxShadow: '0 25px 50px rgba(0,0,0,0.5)',
                 border: '1px solid rgba(255,255,255,0.05)',
-                transform: card.offset ? 'translateY(-1.5rem)' : 'none',
+                transform: (card.offset && !isMobile) ? 'translateY(-1.5rem)' : 'none',
               }}
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>

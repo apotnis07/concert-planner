@@ -20,6 +20,7 @@ class State(TypedDict):
     summary: str
     selected_artist: str
     selected_date: str
+    selected_time: str
     selected_venue_name: str
     selected_venue_address: str
     selected_venue_lat: float | None

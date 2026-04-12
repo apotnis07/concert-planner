@@ -51,9 +51,9 @@ function Navbar() {
           >
             How it works
           </a>
-          <span className="material-symbols-outlined" style={{ color: '#BCCBB9', cursor: 'pointer' }}>
+          {/* <span className="material-symbols-outlined" style={{ color: '#BCCBB9', cursor: 'pointer' }}>
             account_circle
-          </span>
+          </span> */}
         </nav>
       </div>
     </header>

@@ -33,13 +33,14 @@ def _build_summary_prompt(state: State) -> str:
     selected_venue = state.get("selected_venue_name", "")
     selected_artist = state.get("selected_artist", "")  
     selected_date = state.get("selected_date", "")
+    selected_time = state.get("selected_time", "")
 
 
-    if selected_artist and selected_date:
+    if selected_artist and selected_date and selected_time:
         top_concert = next(
             (c for c in concerts if 
              selected_artist.lower() in c.get("artist", "").lower() and 
-             c.get("date") == selected_date), 
+             c.get("date") == selected_date and c.get("time") == selected_time), 
             None
         )
 
@@ -189,15 +190,16 @@ def _fallback_summary(state: State) -> str:
     selected_venue = state.get("selected_venue_name", "")
     selected_artist = state.get("selected_artist", "")
     selected_date = state.get("selected_date", "")
+    selected_time = state.get("selected_time", "")
 
     top_concert = None
 
 
-    if selected_artist and selected_date:
+    if selected_artist and selected_date and selected_time:
         top_concert = next(
             (c for c in concerts if 
              selected_artist.lower() in c.get("artist", "").lower() and 
-             c.get("date") == selected_date), 
+             c.get("date") == selected_date and c.get("time") == selected_time), 
             None
         )
 

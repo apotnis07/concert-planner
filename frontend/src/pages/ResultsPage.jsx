@@ -421,11 +421,11 @@ function CostCard({ costEstimate }) {
 }
 
 // ── Restaurant Cards ──────────────────────────────────────────────────────────
-function RestaurantSection({ restaurants }) {
+function RestaurantSection({ restaurants, selectedDate, isMobile }) {
   if (!restaurants?.length) return (
     <section style={{ marginBottom: '3rem' }}>
-      <h3 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '1.5rem', fontWeight: 700, marginBottom: '1.5rem' }}>Food</h3>
-      <p style={{ color: '#BCCBB9' }}>No restaurant recommendations available.</p>
+      <h3 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '1.5rem', fontWeight: 700, marginBottom: '1.5rem', color: '#E5E2E1' }}>Food</h3>
+      <p style={{ color: '#BCCBB9' }}>No restaurant recommendations available for this time window.</p>
     </section>
   )
 
@@ -435,21 +435,25 @@ function RestaurantSection({ restaurants }) {
       <div
         style={{
           display: 'flex',
-          gap: '1.5rem',
+          gap: isMobile ? '1rem' : '1.5rem',
           overflowX: 'auto',
+          paddingLeft: isMobile ? '0.25rem' : '0',
           paddingBottom: '1.5rem',
           scrollSnapType: 'x mandatory',
+          scrollbarWidth: 'none', // Cleaner look for the horizontal scroll
+          msOverflowStyle: 'none',
+          WebkitOverflowScrolling: 'touch' // Smooth scrolling for iOS
         }}
       >
         {restaurants.map((r, i) => (
           <div
             key={i}
             style={{
-              width: '320px',
-              backgroundColor: '#141414', // Matches ConcertCard background
-              border: '2px solid rgba(71,69,84,0.2)', // Matches ConcertCard border
+              width: isMobile ? '280px' : '320px',
+              backgroundColor: '#141414',
+              border: '2px solid rgba(71,69,84,0.2)',
               borderRadius: '0.75rem',
-              padding: '1.5rem', // Consistent padding with ConcertCard
+              padding: isMobile ? '1.25rem' : '1.5rem',
               scrollSnapAlign: 'start',
               flexShrink: 0,
               position: 'relative',
@@ -458,27 +462,28 @@ function RestaurantSection({ restaurants }) {
               justifyContent: 'space-between'
             }}
           >
-            {/* Status Badge (Top Right) */}
+            {/* Contextual Status Badge */}
             <div
               style={{
                 position: 'absolute',
-                top: '1.5rem',
-                right: '1.5rem',
-                backgroundColor: r.open_now ? 'rgba(29,185,84,0.15)' : 'rgba(71,69,84,0.3)',
-                color: r.open_now ? '#1DB954' : '#BCCBB9',
-                fontSize: '0.65rem',
+                top: isMobile ? '1rem' : '1.5rem',
+                right: isMobile ? '1rem' : '1.5rem',
+                backgroundColor: 'rgba(29,185,84,0.1)',
+                color: '#1DB954',
+                fontSize: '0.6rem',
                 fontWeight: 700,
                 padding: '0.25rem 0.75rem',
                 borderRadius: '9999px',
                 textTransform: 'uppercase',
-                letterSpacing: '0.05em'
+                letterSpacing: '0.05em',
+                border: '1px solid rgba(29,185,84,0.2)'
               }}
             >
-              {r.open_now ? 'Open now' : 'Closed'}
+              Open
             </div>
 
             {/* Header: Type + Name */}
-            <div style={{ marginBottom: '1rem', paddingRight: '5rem' }}>
+            <div style={{ marginBottom: '1rem', paddingRight: '4rem' }}>
               <p style={{
                 fontSize: '0.7rem', fontWeight: 700, letterSpacing: '0.1em',
                 textTransform: 'uppercase', color: '#1DB954', marginBottom: '0.25rem',
@@ -494,11 +499,11 @@ function RestaurantSection({ restaurants }) {
               </h4>
             </div>
 
-            {/* Details: Price + Rating */}
+            {/* Details: Price + Rating + Timing Info */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1.5rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#BCCBB9', fontSize: '0.875rem' }}>
                 <span className="material-symbols-outlined" style={{ fontSize: '1.1rem' }}>payments</span>
-                <span>Price: {r.price || 'N/A'}</span>
+                <span>Budget: {r.price || 'Unknown'}</span>
               </div>
 
               {r.rating && (
@@ -507,11 +512,22 @@ function RestaurantSection({ restaurants }) {
                   <span style={{ fontWeight: 700 }}>{r.rating} / 5.0</span>
                 </div>
               )}
+
+              {/* Added a subtle "Open for Show" line */}
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#BCCBB9', fontSize: '0.875rem' }}>
-                <span className="material-symbols-outlined" style={{ fontSize: '1.1rem' }}>location_on</span>
-                <span>{r.address || ''}</span>
+                <span className="material-symbols-outlined" style={{ fontSize: '1.1rem' }}>schedule</span>
+                <span>Open on {selectedDate || 'Show Day'}</span>
+              </div>
+
+              <div style={{
+                display: 'flex', alignItems: 'flex-start', gap: '0.5rem', color: '#BCCBB9', fontSize: '0.8rem',
+                marginTop: '0.25rem', lineHeight: '1.4'
+              }}>
+                <span className="material-symbols-outlined" style={{ fontSize: '1.1rem', flexShrink: 0 }}>location_on</span>
+                <span>{r.address}</span>
               </div>
             </div>
+
             {/* Footer: Action Link */}
             <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
               {r.google_maps_url && (
@@ -520,23 +536,23 @@ function RestaurantSection({ restaurants }) {
                   target="_blank"
                   rel="noreferrer"
                   style={{
-                    display: 'inline-flex', // Keeps it tight to the content
+                    display: 'inline-flex',
                     alignItems: 'center',
                     gap: '0.4rem',
                     textDecoration: 'none',
                     color: '#BCCBB9',
                     fontSize: '0.75rem',
-                    borderBottom: '1px solid transparent', // The "invisible" line
-                    paddingBottom: '2px', // Space between text and line
+                    borderBottom: '1px solid transparent',
+                    paddingBottom: '2px',
                     transition: 'all 0.3s ease'
                   }}
                   onMouseEnter={e => {
                     e.currentTarget.style.color = '#F8FAFC';
-                    e.currentTarget.style.borderBottomColor = '#F8FAFC'; // Animates the line in
+                    e.currentTarget.style.borderBottomColor = '#F8FAFC';
                   }}
                   onMouseLeave={e => {
                     e.currentTarget.style.color = '#BCCBB9';
-                    e.currentTarget.style.borderBottomColor = 'transparent'; // Hides the line
+                    e.currentTarget.style.borderBottomColor = 'transparent';
                   }}
                 >
                   <span className="material-symbols-outlined" style={{ fontSize: '1rem' }}>near_me</span>
@@ -661,9 +677,17 @@ export default function ResultsPage() {
   const [error, setError] = useState('')
   const [currentStep, setCurrentStep] = useState(0)
 
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
   const hasFetched = useRef(false);
   const prefs = JSON.parse(sessionStorage.getItem('nop_preferences') || '{}')
   const displayCity = prefs.city || 'Chicago';
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     const token = sessionStorage.getItem('nop_access_token')
@@ -704,6 +728,7 @@ export default function ResultsPage() {
             selected_venue_lng: selectedConcert?.venue_lng || '',
             selected_artist: selectedConcert?.artist || '',
             selected_date: selectedConcert?.date || '',
+            selected_time: selectedConcert?.time || '',
 
           },
         })
@@ -759,6 +784,8 @@ export default function ResultsPage() {
   const selectedArtist = selectedConcertData.artist;
 
   const selectedDate = selectedConcertData.date; // Extract the date
+
+  const selectedTime = selectedConcertData.time;
 
   // Updated search logic: Artist + Date > Artist > Venue > Fallback
   const topConcert = plan?.concerts?.find(c =>
@@ -863,7 +890,7 @@ export default function ResultsPage() {
         </section>
 
         {/* Section 3 — Restaurants */}
-        <RestaurantSection restaurants={plan?.restaurants} />
+        <RestaurantSection restaurants={plan?.restaurants} selectedDate={plan?.selectedDate} isMobile={isMobile}/>
 
         {/* Section 4 — Refinement */}
         {/* <RefinementBar onRefine={handleRefine} /> */}
