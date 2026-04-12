@@ -139,42 +139,42 @@ def _build_summary_prompt(state: State) -> str:
     return prompt
 
 
-def get_summary(state: State) -> str:
-    # Bypassing Claude for now — using plain text fallback
-    return _fallback_summary(state)
-
 # def get_summary(state: State) -> str:
-#     """
-#     Call Claude to write the full night out summary.
-#     Falls back to a plain text summary if Claude is unavailable.
-#     """
-#     prompt = _build_summary_prompt(state)
-#     # --- DEBUG START ---
-#     import sys
-#     char_count = len(prompt)
-#     estimated_tokens = char_count / 4  # Rough LLM estimate
-#     print("\n--- SUMMARY PROMPT DEBUG ---")
-#     print(f"Total Characters: {char_count}")
-#     print(f"Estimated Tokens: {estimated_tokens}")
-#     print(f"Memory Size: {sys.getsizeof(prompt) / 1024:.2f} KB")
-#     # --- DEBUG END ---
-#     try:
-#         message = client.messages.create(
-#             model="claude-haiku-4-5-20251001",
-#             max_tokens=800,
-#             temperature=0.7,
-#             messages=[
-#                 {"role": "user", "content": prompt}
-#             ]
-#         )
-#         print("\n--- ANTHROPIC BILLING ---")
-#         print(f"Input Tokens: {message.usage.input_tokens}")
-#         print(f"Output Tokens: {message.usage.output_tokens}")
-#         return message.content[0].text.strip()
+#     # Bypassing Claude for now — using plain text fallback
+#     return _fallback_summary(state)
 
-#     except Exception as e:
-#         print(f"Summary agent Claude error: {e}")
-#         return _fallback_summary(state)
+def get_summary(state: State) -> str:
+    """
+    Call Claude to write the full night out summary.
+    Falls back to a plain text summary if Claude is unavailable.
+    """
+    prompt = _build_summary_prompt(state)
+    # --- DEBUG START ---
+    import sys
+    char_count = len(prompt)
+    estimated_tokens = char_count / 4  # Rough LLM estimate
+    print("\n--- SUMMARY PROMPT DEBUG ---")
+    print(f"Total Characters: {char_count}")
+    print(f"Estimated Tokens: {estimated_tokens}")
+    print(f"Memory Size: {sys.getsizeof(prompt) / 1024:.2f} KB")
+    # --- DEBUG END ---
+    try:
+        message = client.messages.create(
+            model="claude-haiku-4-5-20251001",
+            max_tokens=800,
+            temperature=0.7,
+            messages=[
+                {"role": "user", "content": prompt}
+            ]
+        )
+        print("\n--- ANTHROPIC BILLING ---")
+        print(f"Input Tokens: {message.usage.input_tokens}")
+        print(f"Output Tokens: {message.usage.output_tokens}")
+        return message.content[0].text.strip()
+
+    except Exception as e:
+        print(f"Summary agent Claude error: {e}")
+        return _fallback_summary(state)
 
 
 def _fallback_summary(state: State) -> str:

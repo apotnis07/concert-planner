@@ -106,45 +106,45 @@ def _build_prompt(concerts: list, directions: list, restaurants: list) -> str:
     """
     return prompt.strip()
 
-def get_cost_estimate(concerts: list, directions: list, restaurants: list) -> dict:
-    # Bypassing Claude for now — using rule-based fallback
-    return _fallback_estimate(concerts, directions, restaurants)
-
-
 # def get_cost_estimate(concerts: list, directions: list, restaurants: list) -> dict:
-#     """
-#     Call Claude to reason about the cost of the night out.
-#     Falls back to rule-based estimates if Claude call fails.
-#     """
-#     prompt = _build_prompt(concerts, directions, restaurants)
+#     # Bypassing Claude for now — using rule-based fallback
+#     return _fallback_estimate(concerts, directions, restaurants)
 
-#     try:
-#         message = client.messages.create(
-#             model="claude-haiku-4-5-20251001",
-#             max_tokens=800,
-#             temperature=0.7,
-#             messages=[
-#                 {"role": "user", "content": prompt}
-#             ]
-#         )
 
-#         raw = message.content[0].text.strip()
+def get_cost_estimate(concerts: list, directions: list, restaurants: list) -> dict:
+    """
+    Call Claude to reason about the cost of the night out.
+    Falls back to rule-based estimates if Claude call fails.
+    """
+    prompt = _build_prompt(concerts, directions, restaurants)
 
-#         # Strip markdown code fences if Claude wraps the JSON
-#         if raw.startswith("```"):
-#             raw = raw.split("```")[1]
-#             if raw.startswith("json"):
-#                 raw = raw[4:]
-#             raw = raw.strip()
+    try:
+        message = client.messages.create(
+            model="claude-haiku-4-5-20251001",
+            max_tokens=800,
+            temperature=0.7,
+            messages=[
+                {"role": "user", "content": prompt}
+            ]
+        )
 
-#         return json.loads(raw)
+        raw = message.content[0].text.strip()
 
-#     except json.JSONDecodeError as e:
-#         print(f"Claude returned invalid JSON: {e}")
-#         return _fallback_estimate(concerts, directions, restaurants)
-#     except Exception as e:
-#         print(f"Claude API error: {e}")
-#         return _fallback_estimate(concerts, directions, restaurants)
+        # Strip markdown code fences if Claude wraps the JSON
+        if raw.startswith("```"):
+            raw = raw.split("```")[1]
+            if raw.startswith("json"):
+                raw = raw[4:]
+            raw = raw.strip()
+
+        return json.loads(raw)
+
+    except json.JSONDecodeError as e:
+        print(f"Claude returned invalid JSON: {e}")
+        return _fallback_estimate(concerts, directions, restaurants)
+    except Exception as e:
+        print(f"Claude API error: {e}")
+        return _fallback_estimate(concerts, directions, restaurants)
 
 
 
