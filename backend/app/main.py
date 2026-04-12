@@ -41,7 +41,7 @@ def callback(code: str = Query(...)):
         raise HTTPException(status_code=400, detail="Failed to get token from Spotify")
     # Redirect to frontend preferences page with token in URL
     access_token = token_info["access_token"]
-    return RedirectResponse(url=f"http://localhost:5173/preferences?access_token={access_token}")
+    return RedirectResponse(url=f"{os.getenv('FRONTEND_URL', 'http://localhost:5173')}/preferences?access_token={access_token}")
 
 @app.get("/api/top-artists")
 def top_artists(access_token: str = Query(...)):
