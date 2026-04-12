@@ -217,8 +217,9 @@ def directions_node(state: State) -> State:
 
     venue_name = top_concert.get("venue_name", "")
     venue_address = top_concert.get("venue_address", "")
-    destination = f"{venue_name}, {venue_address}, Chicago, IL"
-    
+    current_city = state.get("city", "Chicago")
+    destination = f"{venue_name}, {venue_address}, {current_city}" 
+      
     directions = get_directions(state["origin"], destination)
     
     return {

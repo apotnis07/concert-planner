@@ -658,6 +658,8 @@ export default function ResultsPage() {
   useEffect(() => {
     const token = sessionStorage.getItem('nop_access_token')
     const prefs = JSON.parse(sessionStorage.getItem('nop_preferences') || '{}')
+    
+    const displayCity = prefs.city || 'Chicago';
 
     if (!token) {
       navigate('/')
@@ -785,7 +787,7 @@ export default function ResultsPage() {
             Your Night Out Plan
           </h1>
           <p style={{ color: '#BCCBB9', fontSize: '1.25rem' }}>
-            <span>Planned for Chicago • {formatDate(selectedConcertData.date)}</span>
+            <span>Planned for {displayCity} • {formatDate(selectedConcertData.date)}</span>
           </p>
         </header>
 

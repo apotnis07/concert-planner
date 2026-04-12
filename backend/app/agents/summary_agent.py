@@ -49,11 +49,14 @@ def _build_summary_prompt(state: State) -> str:
     # 3. Final safety fallback
     if not top_concert and concerts:
         top_concert = concerts[0]
-    concert_str = "No upcoming concerts found in Chicago." if not top_concert else f"""
+
+    current_city = state.get("city", "Chicago")
+
+    concert_str = "No upcoming concerts found in {current_city}." if not top_concert else f"""
     - Event: {top_concert.get("event_name")}
     - Artist: {top_concert.get("artist")}
     - Venue: {top_concert.get("venue_name")}
-    - Address: {top_concert.get("venue_address")}, Chicago, IL
+    - Address: {top_concert.get("venue_address")}, {current_city}
     - Date: {top_concert.get("date")}
     - Time: {top_concert.get("time", "TBD")}
     - Tickets: {f'${top_concert.get("min_price")} - ${top_concert.get("max_price")}' if top_concert.get("price_available") else "Price unavailable — check Ticketmaster"}
@@ -98,7 +101,7 @@ def _build_summary_prompt(state: State) -> str:
     )
 
     prompt = f"""
-    You are a friendly Chicago night-out planner. 
+    You are a friendly {current_city} night-out planner. 
     Write a concise, exciting night out plan using the data below.
 
     ## IMPORTANT
