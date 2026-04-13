@@ -29,6 +29,11 @@ Live Demo: https://concert-planner.vercel.app
 ## Video Demo
 
 ### Home Page
+<div align="left">
+  <img src="./assets/demo/Home1.png" alt="Home 1">
+  <img src="./assets/demo/Home2.png" alt="Home 2">
+  <img src="./assets/demo/Home3.png" alt="Home 3">
+</div>
 
 
 ### Spotify Login
@@ -42,9 +47,8 @@ Live Demo: https://concert-planner.vercel.app
 </div>
 
 ### Concert Picker + Loader
-<div align="left">
-  <img src="./assets/demo/ConcertPicker_Sonic.gif" width="95%" alt="Concert Picker">
-</div>
+![ConcertPicker_Sonic](https://github.com/user-attachments/assets/6152f585-9dcd-4f24-bef7-1e63f43bef69)
+
 
 ### Results Page
 <div align="left">
