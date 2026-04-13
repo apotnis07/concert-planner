@@ -135,7 +135,6 @@ def is_open_in_window(res_hours: dict, concert_date: str, concert_time: str) -> 
     except (ValueError, TypeError):
         start_dt = datetime.strptime(f"{concert_date} 19:00:00", "%Y-%m-%d %H:%M:%S")
         
-    window_start_dt = start_dt - timedelta(hours=2)
     # 1. Pre-show: 2 hours before the start
     pre_show_start = (start_dt - timedelta(hours=2))
     # 2. Post-show: Assuming a 2.5 hour show duration
