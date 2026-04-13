@@ -30,12 +30,26 @@ Live Demo: https://concert-planner.vercel.app
 
 ### Home Page
 
+
+### Spotify Login
+<div align="left">
+  <img src="./assets/demo/Login_Sonic.gif" width="95%" alt="Login">
+</div>
+
 ### Preferences Page
+<div align="left">
+  <img src="./assets/demo/Preferences_Sonic.gif" width="95%" alt="Preferences">
+</div>
 
 ### Concert Picker + Loader
+<div align="left">
+  <img src="./assets/demo/ConcertPicker_Sonic.gif" width="95%" alt="Concert Picker">
+</div>
 
 ### Results Page
-
+<div align="left">
+  <img src="./assets/demo/ResultsPage_Sonic.gif" width="95%" alt="Results">
+</div>
 
 ## Architecture
 
