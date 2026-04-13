@@ -18,7 +18,6 @@ def _build_summary_prompt(state: State) -> str:
             print(f"  First {key} item size: {sys.getsizeof(str(data[0])) / 1024:.2f} KB")
             
     artists = state.get("followed_artists", [])
-    concerts = state.get("concerts", [])
     directions = state.get("directions", [])
     restaurants = state.get("restaurants", [])
     cost = state.get("cost_estimate", {})
@@ -64,8 +63,6 @@ def _build_summary_prompt(state: State) -> str:
     - Address: {top_concert.get("venue_address")}, {current_city}
     - Date: {top_concert.get("date")}
     - Time: {top_concert.get("time", "TBD")}
-    - Tickets: {f'${top_concert.get("min_price")} - ${top_concert.get("max_price")}' if top_concert.get("price_available") else "Price unavailable — check Ticketmaster"}
-    - Ticketmaster URL: {top_concert.get("url", "N/A")}
     """.strip()
 
     # Directions
@@ -107,15 +104,16 @@ def _build_summary_prompt(state: State) -> str:
 
     prompt = f"""
     You are a friendly {current_city} night-out planner. 
-    Write a concise, exciting night out plan using the data below.
+    Write a concise, exciting night out plan based ONLY on the provided JSON data.
 
-    ## IMPORTANT
-    Focus EXCLUSIVELY on the concert at {top_concert.get('venue_name') if top_concert else 'the venue'}. 
-    Ignore any other festival dates or locations.
+    ## STRICT DATA GROUNDING RULES
+    1. USE ONLY the Artist, Venue, and Date provided in the "Concert" section below. 
+    2. DO NOT add opening acts, festival lineups, or other artists from your internal knowledge base.
+    3. Focus EXCLUSIVELY on the show at {top_concert.get('venue_name') if top_concert else 'the venue'}.
 
     ## Context
     Artists: {artists_str}
-    Concert: {concert_str}
+    SPECIFIC Concert: {concert_str}
     Directions: {directions_str}
     Food: {restaurants_str}
     Costs: {cost_str}
@@ -128,11 +126,11 @@ def _build_summary_prompt(state: State) -> str:
     - **Formatting:** Use plain paragraphs with markdown headers.
 
     ## Sections
-    1. **The Show** — Briefly highlight the artist, venue, and time.
+    1. **The Show** — Briefly highlight the selected artist, venue, and time.
     2. **Getting There** — Give one clear transit recommendation.
     3. **Dinner** — Recommend the top restaurant pick and why it fits.
     4. **Budget** — State the total range and the primary cost driver.
-    5. **Quick Tips** — Provide two brief, practical Chicago tips.
+    5. **Quick Tips** — Provide two brief, practical {current_city} tips.
 
     Tone: Conversational but highly efficient. If data is missing, mention it briefly and move on.
     """.strip()
