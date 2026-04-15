@@ -62,32 +62,30 @@ flowchart TD
     U([User]) --> LP[Landing Page]
     LP -->|Spotify OAuth| PP[Preferences Page]
     PP -->|city · cuisine · budget| CP[Concert Picker]
+    CP -->|/api/concerts| TM[Spotify + Ticketmaster Concert Details]
+    TM --> CP
 
     subgraph pipeline["LangGraph Pipeline"]
         direction TB
         A1[Spotify Agent]
         A2[Concerts Agent - Ticketmaster]
 
-        subgraph results["Results Pipeline"]
-            direction TB
-            A3[Directions Agent - Google Routes]
-            A4[Restaurants Agent - Google Places]
-            A5[Cost Agent - Claude]
-            A6[Summary Agent - Claude]
-            A3 --> A4
-            A4 --> A5
-            A5 --> A6
-        end
+        direction TB
+        A3[Directions Agent - Google Routes]
+        A4[Restaurants Agent - Google Places]
+        A5[Cost Agent - Claude]
+        A6[Summary Agent - Claude]
+        A3 --> A4
+        A4 --> A5
+        A5 --> A6
 
         A1 -->|followed artists| A2
         A2 -->|concerts| A3
     end
 
-    LP --> A1
-    PP -->|city| A2
-    A2 -->|artists' concerts| CP
-    CP -->|selected concert| results
-    results --> RP[Results Page]
+    CP -->|selected concert + /api/plan/| A1
+    A6 --> RP[Results Page]
+    CP --> RP
 
     RP --> CC[Concert Card]
     RP --> DC[Directions Modal]
@@ -167,3 +165,37 @@ In your .env file, fill in these API keys
 | `ANTHROPIC_API_KEY` | Anthropic API key |
 | `TICKETMASTER_API_KEY` | Ticketmaster Discovery API key |
 | `GOOGLE_MAPS_API_KEY` | Google Cloud API key — enables Routes, Places, and Geocoding |
+
+
+## Deploying
+
+Railway makes it accessible to deploy a Python backend by creating a seamless CI/CD integration with your GitHub repo.
+
+| Feature | Railway | Render |
+|----------|-------------|----|
+|Free Tier |	$5 for the first month |	750 hours / month |
+|Server Spin Down |	No |	Yes, after 15 mins of inactivity | 
+
+1. The frontend of the application was developed using React + Vite, and Vercel offers a free tier to deploy the framework.
+2. To deploy on Railway, first connect the repo that needs to be deployed. This is  a monorepo; select the backend folder as your root folder.
+3. Add all the environment variables to Railway and deploy. Once deployed, Railway will generate a URL for the app.
+```bash
+https://your-railway-url.up.railway.app/callback
+```
+Add this link to your Redirect URIs on the Spotify Dashboard in your application.
+4. Update the environment variable in Railway for SPOTIFY_REDIRECT_URI
+```bash
+SPOTIFY_REDIRECT_URI=https://your-railway-url.up.railway.app/callback
+```
+5. Connect your repo to Vercel, select root directory as frontend and framework as Vite and add an environment variable
+```bash
+VITE_API_URL=https://your-railway-url.up.railway.app
+```
+6. Deploy, and Vercel will give you a URL to access the application. Add the following environment variable to Railway.
+```bash
+FRONTEND_URL=https://your-vercel-url.vercel.app
+```
+7. The application is deployed and can be accessed from https://your-vercel-url.vercel.app
+
+
+
