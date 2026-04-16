@@ -25,6 +25,7 @@ Built with LangGraph, the system orchestrates a pipeline of 6 specialized agents
 
 ## Wesbite
 Live Demo: https://concert-planner.vercel.app
+
 Medium Article: https://medium.com/@apotnis07/multi-agent-orchestration-to-conduct-your-night-out-5bfeca092560
 
 ## Video Demo
