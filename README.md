@@ -24,7 +24,7 @@ Built with LangGraph, the system orchestrates a pipeline of 6 specialized agents
 6. Summary Agent — synthesizes all agent outputs into a personalized night out plan via Claude
 
 ## Wesbite
-Live Demo: https://concert-planner.vercel.app
+Live Demo: https://concert-planner-ui.onrender.com
 
 Medium Article: https://medium.com/@apotnis07/multi-agent-orchestration-to-conduct-your-night-out-5bfeca092560
 
