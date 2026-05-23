@@ -1,8 +1,26 @@
 import { useEffect } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+
+const API_URL = import.meta.env.VITE_API_URL;
 
 // Tailwind is loaded via CDN in index.html — see setup notes below
 export default function LandingPage() {
+
+  const [isConnecting, setIsConnecting] = useState(false);
+  const [serverReady, setServerReady] = useState(false);
+
+  useEffect(() => {
+    fetch(`${API_URL}/health`)
+      .then(() => setServerReady(true))
+      .catch(() => setServerReady(true)); // still proceed even if ping fails
+  }, []);
+
+  const handleConnectSpotify = () => {
+    setIsConnecting(true);
+    window.location.href = `${API_URL}/login`;
+  };
+
   const navigate = useNavigate()
 
   const handleSpotifyLogin = async () => {
@@ -86,7 +104,7 @@ export default function LandingPage() {
           {/* CTA */}
           <div style={{ paddingTop: '2rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
             <button
-              onClick={handleSpotifyLogin}
+              onClick={handleSpotifyLogin} disabled={isConnecting}
               style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -114,8 +132,18 @@ export default function LandingPage() {
               <svg width="24" height="24" viewBox="0 0 24 24" fill="#003914" xmlns="http://www.w3.org/2000/svg">
                 <path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm4.586 14.424a.623.623 0 01-.857.207c-2.348-1.435-5.304-1.76-8.785-.964a.623.623 0 11-.277-1.215c3.809-.87 7.076-.496 9.712 1.115a.623.623 0 01.207.857zm1.223-2.722a.78.78 0 01-1.072.257C14.1 12.26 10.539 11.88 7.2 12.863a.78.78 0 11-.453-1.492c3.773-1.146 7.768-.707 10.805 1.258a.78.78 0 01.257 1.073zm.105-2.835C14.692 8.95 9.375 8.775 6.297 9.71a.937.937 0 11-.543-1.794c3.527-1.07 9.393-.863 13.1 1.306a.937.937 0 01-.94 1.645z" />
               </svg>
-              <span>Connect with Spotify</span>
+              {/* <span>Connect with Spotify</span> */}
+              {isConnecting
+                ? "Connecting..."
+                : "Connect with Spotify"}
             </button>
+
+            {isConnecting && !serverReady && (
+              <p style={{ marginTop: "8px", fontSize: "0.85rem", opacity: 0.7 }}>
+                Waking up the server — this can take up to 30 seconds on first load.
+              </p>
+            )}
+
             <p
               style={{
                 fontSize: '0.7rem',
